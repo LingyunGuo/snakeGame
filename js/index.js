@@ -7,23 +7,23 @@ var V_GRID = HEIGHT / UNIT + 2;
 var OCCUPANT = { TAKEN: "1", FOOD: "2", SPACE: "0" };
 //
 var inGame;
-
+var pause;
+var score;
 // Class
 var Position = function (x, y) {
     return { x: x, y: y };
 };
 
-
-
 $(document).ready(function () {
     var canvas = $('#canvas');
     var ctx = canvas.get(0).getContext("2d");
     var snake = {};
+    var food = {};
     var coordinate = {
         fillGrid: fillGrid
     };
     var timer = {
-        timeInterval: 300,
+        timeInterval: 180,
         run: function () {
             this.interval = setInterval(moveSnake, this.timeInterval);
         },
@@ -36,10 +36,17 @@ $(document).ready(function () {
         }
     };
     inGame = false;
-    start();
+    pause = false;
+    var keydown;
     $(document).keydown(function (event) {
-        if (inGame === true) {
+        if (inGame === true && pause === false && !keydown) {
+            keydown = event.which;
             keyboardHandler(event.which);
+        }
+    });
+    $(document).keyup(function (event) {
+        if (event.which === keydown) {
+            keydown = undefined;
         }
     });
 
@@ -83,28 +90,52 @@ $(document).ready(function () {
         drawSnake(snake);
     }
 
-    function fillGrid(snake) {
-        var clearPos = snake.position[snake.position.length - 1];
-        var newPos = snake.position[0];
-        if (0 < clearPos.x < V_GRID && 0 < clearPos.y < H_GRID) {
-            this.grid[clearPos.x][clearPos.y] = OCCUPANT.SPACE;
+    function fillGrid(snake, cut) {
+        if (cut) {
+            var clearPos = snake.position[snake.position.length - 1];
+            if (0 < clearPos.x < V_GRID && 0 < clearPos.y < H_GRID) {
+                this.grid[clearPos.x][clearPos.y] = OCCUPANT.SPACE;
+            }
+            snake.position.pop();
         }
+
+        var newPos = snake.position[0];
+
         if (0 < newPos.x < V_GRID && 0 < newPos.y < H_GRID) {
             this.grid[newPos.x][newPos.y] = OCCUPANT.TAKEN;
         }
     }
 
     function start() {
+        score = 0;
         inGame = true;
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
         init(coordinate, snake);
+        $('.btnPanel').css("display", "none");
+        $(".score_in_panel").html(score);
+        $('.score2Wrap').css("display", "block");
+        var fast = $('#myonoffswitch').attr("checked");
+        if (fast) {
+            console.log('fast');
+            timer.set(100);
+        }
+        else {
+            timer.set(180);
+        }
         timer.run();
+        generateFood();
     }
     function drawSnake(snake) {
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        if (food.position && food.type) {
+            drawFood(food.position.x, food.position.y, food.type);
+        }
         drawHead(snake.direction, snake.position[0].x, snake.position[0].y);
         for (var i = 1; i < snake.position.length; i++) {
             drawTail(snake.position[i].x, snake.position[i].y);
+        }
+        if (keydown !== undefined) {
+            keydown = undefined;
         }
     }
     function drawHead(dir, x, y) {
@@ -118,38 +149,80 @@ $(document).ready(function () {
 
     function moveSnake() {
         var dir = snake.direction;
-        for (var i = snake.position.length - 1; i > 0; i--) {
-            snake.position[i] = JSON.parse(JSON.stringify(snake.position[i - 1]));
-        }
+        var tail = JSON.parse(JSON.stringify(snake.position[snake.position.length - 1]));
+        var nextPos = JSON.parse(JSON.stringify(snake.position[0]));
         switch (dir) {
             case "+x":
-                snake.position[0].x++;
+                nextPos.x++;
                 break;
             case "-x":
-                snake.position[0].x--;
+                nextPos.x--;
                 break;
             case "+y":
-                snake.position[0].y--;
+                nextPos.y--;
                 break;
             default:
-                snake.position[0].y++;
+                nextPos.y++;
                 break;
         }
-        var go = (coordinate.grid[x][y] !== OCCUPANT.TAKEN);
+        var go = (coordinate.grid[nextPos.x][nextPos.y] === OCCUPANT.SPACE);
+        var eat = (coordinate.grid[nextPos.x][nextPos.y] === OCCUPANT.FOOD);
         if (go) {
-            coordinate.fillGrid(snake);
+            snake.position.unshift(nextPos);
+            coordinate.fillGrid(snake, true);
+            drawSnake(snake);
+        }
+        else if (eat) {
+            score += 10;
+            $(".score_in_panel").html(score);
+            snake.position.unshift(nextPos);
+            snake.length++;
+            food = {};
+            generateFood();
+            coordinate.fillGrid(snake, false);
             drawSnake(snake);
         }
         else {
             timer.stop(function () {
                 inGame = false;
-                console.log('game failed');
+                for (var i = 0; i < coordinate.grid.length; i++) {
+                    delete coordinate.grid[i];
+                }
+                delete coordinate.grid;
+                inGame = false;
+                pause = false;
+                ctx.globalAlpha = 0.4;
+                ctx.fillStyle = '#E0E0E0';
+                ctx.fillRect(0, 0, WIDTH, HEIGHT);
+                $("#btn_in_panel").html("Again");
+                $(".score_in_panel").html(score);
+                $('.btnPanel').css("display", "block");
+                $('.score2Wrap').css("display", "none");
             });
+            return;
         }
     }
     function turnSnake(newDir) {
         snake.direction = newDir;
         drawSnake(snake);
+    }
+
+    function generateFood() {
+        var HorizontalRan;
+        var VerticalRan;
+        do {
+            HorizontalRan = Math.floor((Math.random() * H_GRID) - 1);
+            VerticalRan = Math.floor((Math.random() * V_GRID) - 1);
+        }
+        while (coordinate.grid[HorizontalRan][VerticalRan] !== OCCUPANT.SPACE);
+        coordinate.grid[HorizontalRan][VerticalRan] = OCCUPANT.FOOD;
+        food.position = Position(HorizontalRan, VerticalRan);
+        food.type = Math.floor((Math.random() * 4) + 1);
+        drawFood(HorizontalRan, VerticalRan, food.type);
+    }
+    function drawFood(x, y, type) {
+        var img = document.getElementById("candy" + type);
+        ctx.drawImage(img, (x - 1) * UNIT, (y - 1) * UNIT);
     }
     function keyboardHandler(key) {
         var currentDir = snake.direction;
@@ -175,13 +248,41 @@ $(document).ready(function () {
             case 272:
                 newDir = "+x";
                 break;
-            default:
-                console.log("key not implemented yet");
+            case 32:
+                timer.stop(function () {
+                    keydown = undefined;
+                    inGame = false;
+                    pause = true;
+                    ctx.globalAlpha = 0.4;
+                    ctx.fillStyle = '#E0E0E0';
+                    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+                    $("#btn_in_panel").html("Continue");
+                    $('.btnPanel').css("display", "block");
+                    $('.score2Wrap').css("display", "none");
+                    $(".score_in_panel").html(score);
+                    $(".switchWrap").css("display", "none");
+                });
+                break;
+            default: break;
         }
         if (newDir !== undefined && currentDir !== newDir && currentDir[1] !== newDir[1]) {
             turnSnake(newDir);
         }
     }
+    $("#btn_in_panel").click(function () {
+        if (inGame === false && pause === true) {
+            pause = false;
+            inGame = true;
+            timer.run();
+            $('.btnPanel').css("display", "none");
+            $('.score2Wrap').css("display", "block");
+            $(".switchWrap").css("display", "inline-block");
+            drawSnake(snake);
+        }
+        else if (inGame === false && pause === false) {
+            start();
+        }
+    });
 });
 
 

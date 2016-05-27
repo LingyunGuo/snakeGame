@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Tetris</title>
+    <title>Snake</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width initial-scale=1 maximum-scale=1 user-scalable=0">
     <link rel="stylesheet" href="./css/style.css" />
@@ -19,25 +19,38 @@
 <body>
     <div class="container">
         <div class="row">
-            <div id="canvasWrap" class="col-md-12 col-sm-12 col-xs-12" tabindex="1">
-                <canvas id="canvas" width="720" height="480">
-                    Your browser doesn't support HTML5 Canvas.
-                </canvas>
-                <h5 id="score2Wrap">Score: <span id="score2">0</span></h5>
-                <!--<div class="btnBlock">
-                    <h1 id="tetris">Tetris</h1>
-                    <button id="startGameBtn" class="btn btn-lg btn-default">Start Game</button>
-                    <h3>Score: <span id="score">0</span></h3>
-                </div>
-                <div class="alertBox alert alert-warning">
-                    <h3>Warning!</h3>
-                </div>-->
+            <div class="imgWrap">
                 <img src="./img/head+x.png" id="head_icon+x" alt="head_icon+x" />
                 <img src="./img/head-x.png" id="head_icon-x" alt="head_icon-x" />
                 <img src="./img/head+y.png" id="head_icon+y" alt="head_icon+y" />
                 <img src="./img/head-y.png" id="head_icon-y" alt="head_icon-y" />
                 <img src="./img/tail.png" id="tail_icon" alt="tail_icon" />
+                <img src="./img/candy1.png" id="candy1" alt="candy1" />
+                <img src="./img/candy2.png" id="candy2" alt="candy2" />
+                <img src="./img/candy3.png" id="candy3" alt="candy3" />
+                <img src="./img/candy4.png" id="candy4" alt="candy4" />
             </div>
+            <div id="canvasWrap" class="col-md-12 col-sm-12 col-xs-12" tabindex="1">
+                <canvas id="canvas" width="720" height="480">
+                    Your browser doesn't support HTML5 Canvas.
+                </canvas>
+                <h5 class="score2Wrap">Score: <span class="score_in_panel">0</span></h5>
+                <div class="btnPanel">
+                    <h1>Snake</h1>
+                    <h3 class="score">Score: <span class="score_in_panel">0</span></h1>
+                    <button type="button" id="btn_in_panel" class="btn btn-lg btn-default">Start</button><br/>
+                    <div class="switchWrap">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+                            <label class="onoffswitch-label" for="myonoffswitch">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
