@@ -9,6 +9,7 @@ var OCCUPANT = { TAKEN: "1", FOOD: "2", SPACE: "0" };
 var inGame;
 var pause;
 var score;
+var turning;
 // Class
 var Position = function (x, y) {
     return { x: x, y: y };
@@ -37,16 +38,9 @@ $(document).ready(function () {
     };
     inGame = false;
     pause = false;
-    var keydown;
     $(document).keydown(function (event) {
-        if (inGame === true && pause === false && !keydown) {
-            keydown = event.which;
+        if (inGame === true && pause === false) {
             keyboardHandler(event.which);
-        }
-    });
-    $(document).keyup(function (event) {
-        if (event.which === keydown) {
-            keydown = undefined;
         }
     });
 
@@ -134,9 +128,6 @@ $(document).ready(function () {
         for (var i = 1; i < snake.position.length; i++) {
             drawTail(snake.position[i].x, snake.position[i].y);
         }
-        if (keydown !== undefined) {
-            keydown = undefined;
-        }
     }
     function drawHead(dir, x, y) {
         var img = document.getElementById("head_icon" + dir);
@@ -171,6 +162,9 @@ $(document).ready(function () {
             snake.position.unshift(nextPos);
             coordinate.fillGrid(snake, true);
             drawSnake(snake);
+            if (turning) {
+                turning = false;
+            }
         }
         else if (eat) {
             score += 10;
@@ -181,6 +175,9 @@ $(document).ready(function () {
             generateFood();
             coordinate.fillGrid(snake, false);
             drawSnake(snake);
+            if (turning) {
+                turning = false;
+            }
         }
         else {
             timer.stop(function () {
@@ -227,46 +224,50 @@ $(document).ready(function () {
     function keyboardHandler(key) {
         var currentDir = snake.direction;
         var newDir;
-        switch (key) {
-            case 1:
-            case 38:
-            case 269:
-                newDir = "+y";
-                break;
-            case 2:
-            case 40:
-            case 270:
-                newDir = "-y";
-                break;
-            case 3:
-            case 37:
-            case 271:
-                newDir = "-x";
-                break;
-            case 4:
-            case 39:
-            case 272:
-                newDir = "+x";
-                break;
-            case 32:
-                timer.stop(function () {
-                    keydown = undefined;
-                    inGame = false;
-                    pause = true;
-                    ctx.globalAlpha = 0.4;
-                    ctx.fillStyle = '#E0E0E0';
-                    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-                    $("#btn_in_panel").html("Continue");
-                    $('.btnPanel').css("display", "block");
-                    $('.score2Wrap').css("display", "none");
-                    $(".score_in_panel").html(score);
-                    $(".switchWrap").css("display", "none");
-                });
-                break;
-            default: break;
-        }
-        if (newDir !== undefined && currentDir !== newDir && currentDir[1] !== newDir[1]) {
-            turnSnake(newDir);
+        if ([1, 2, 3, 4, 37, 38, 39, 40, 269, 270, 271, 272, 32].indexOf(key) >= 0 && !turning) {
+            if (key !== 32) {
+                turning = true;
+            }
+            switch (key) {
+                case 1:
+                case 38:
+                case 269:
+                    newDir = "+y";
+                    break;
+                case 2:
+                case 40:
+                case 270:
+                    newDir = "-y";
+                    break;
+                case 3:
+                case 37:
+                case 271:
+                    newDir = "-x";
+                    break;
+                case 4:
+                case 39:
+                case 272:
+                    newDir = "+x";
+                    break;
+                case 32:
+                    timer.stop(function () {
+                        inGame = false;
+                        pause = true;
+                        ctx.globalAlpha = 0.4;
+                        ctx.fillStyle = '#E0E0E0';
+                        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+                        $("#btn_in_panel").html("Continue");
+                        $('.btnPanel').css("display", "block");
+                        $('.score2Wrap').css("display", "none");
+                        $(".score_in_panel").html(score);
+                        $(".switchWrap").css("display", "none");
+                    });
+                    break;
+                default: break;
+            }
+            if (newDir !== undefined && currentDir !== newDir && currentDir[1] !== newDir[1]) {
+                turnSnake(newDir);
+            }
         }
     }
     $("#btn_in_panel").click(function () {
