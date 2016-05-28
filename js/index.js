@@ -204,8 +204,8 @@ $(document).ready(function () {
         var HorizontalRan;
         var VerticalRan;
         do {
-            HorizontalRan = Math.floor((Math.random() * H_GRID) - 1);
-            VerticalRan = Math.floor((Math.random() * V_GRID) - 1);
+            HorizontalRan = Math.floor((Math.random() * (H_GRID - 2)) + 1);
+            VerticalRan = Math.floor((Math.random() * (V_GRID - 2)) + 1);
         }
         while (coordinate.grid[HorizontalRan][VerticalRan] !== OCCUPANT.SPACE);
         coordinate.grid[HorizontalRan][VerticalRan] = OCCUPANT.FOOD;
