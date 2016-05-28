@@ -40,7 +40,7 @@ button {
     float: right;
     position: relative;
     display: none;
-    right: 5px;
+    right: 220px;
 }
 #btn_in_panel {
     display: inline;

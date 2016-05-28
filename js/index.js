@@ -103,6 +103,7 @@ $(document).ready(function () {
     function start() {
         score = 0;
         inGame = true;
+        ctx.globalAlpha = 1;
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
         init(coordinate, snake);
         $('.btnPanel').css("display", "none");
@@ -158,15 +159,7 @@ $(document).ready(function () {
         }
         var go = (coordinate.grid[nextPos.x][nextPos.y] === OCCUPANT.SPACE);
         var eat = (coordinate.grid[nextPos.x][nextPos.y] === OCCUPANT.FOOD);
-        if (go) {
-            snake.position.unshift(nextPos);
-            coordinate.fillGrid(snake, true);
-            drawSnake(snake);
-            if (turning) {
-                turning = false;
-            }
-        }
-        else if (eat) {
+        if (eat) {
             score += 10;
             $(".score_in_panel").html(score);
             snake.position.unshift(nextPos);
@@ -174,6 +167,14 @@ $(document).ready(function () {
             food = {};
             generateFood();
             coordinate.fillGrid(snake, false);
+            drawSnake(snake);
+            if (turning) {
+                turning = false;
+            }
+        }
+        else if (go) {
+            snake.position.unshift(nextPos);
+            coordinate.fillGrid(snake, true);
             drawSnake(snake);
             if (turning) {
                 turning = false;
@@ -275,6 +276,8 @@ $(document).ready(function () {
             pause = false;
             inGame = true;
             timer.run();
+            ctx.globalAlpha = 1;
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
             $('.btnPanel').css("display", "none");
             $('.score2Wrap').css("display", "block");
             $(".switchWrap").css("display", "inline-block");
