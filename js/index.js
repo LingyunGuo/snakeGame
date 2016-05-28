@@ -183,11 +183,6 @@ $(document).ready(function () {
         else {
             timer.stop(function () {
                 inGame = false;
-                for (var i = 0; i < coordinate.grid.length; i++) {
-                    delete coordinate.grid[i];
-                }
-                delete coordinate.grid;
-                inGame = false;
                 pause = false;
                 ctx.globalAlpha = 0.4;
                 ctx.fillStyle = '#E0E0E0';
